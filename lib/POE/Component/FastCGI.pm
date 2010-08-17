@@ -1,68 +1,5 @@
-=head1 NAME
-
-POE::Component::FastCGI - POE FastCGI server
-
-=head1 NO LONGER MAINTAINED
-
-This module is no longer maintained. You might consider L<AnyEvent::FCGI>
-or L<Net::FastCGI> instead. Or not using FastCGI at all and using a L<Plack>
-based server (very much recommended). Or ask and you can have this.
-
-=head1 SYNOPSIS
-
-You can use this module with a direct subroutine callback:
-
-  use POE;
-  use POE::Component::FastCGI;
-
-  POE::Component::FastCGI->new(
-     Port => 1026,
-     Handlers => [
-        [ '/' => \&default ],
-     ]
-  );
-
-  sub default {
-     my($request) = @_;
-
-     my $response = $request->make_response;
-     $response->header("Content-type" => "text/html");
-     $response->content("A page");
-     $response->send;
-  }
-
-  POE::Kernel->run;
-
-and a POE event callback:
-
-  use POE;
-  use POE::Component::FastCGI;
-
-  POE::Component::FastCGI->new(
-     Port => 1026,
-     Handlers => [
-        [ '/' => 'poe_event_name' ],
-     ]
-     Session => 'MAIN',
-  );
-
-  sub default {
-     my($request) = @_;
-
-     my $response = $request->make_response;
-     $response->header("Content-type" => "text/html");
-     $response->content("A page");
-     $response->send;
-  }
-
-=head1 DESCRIPTION
-
-Provides a FastCGI (L<http://www.fastcgi.com/>) server for L<POE>.
-
-=over 4
-
-=cut
 package POE::Component::FastCGI;
+
 use strict;
 
 use Carp qw(croak);
@@ -76,50 +13,6 @@ use POE qw(
 
 use POE::Component::FastCGI::Request;
 use POE::Component::FastCGI::Response;
-
-our $VERSION = '0.11';
-
-=item POE::Component::FastCGI->new([name => value], ...)
-
-Creates a new POE session for the FastCGI server and listens on the specified
-port.
-
-Parameters
-  Auth (optional)
-     A code reference to run when called as a FastCGI authorizer.
-  Handlers (required)
-     A array reference with a mapping of paths to code references or POE event names.
-  Port (required unless Unix is set)
-     Port number to listen on.
-  Address (requied if Unix is set)
-     Address to listen on.
-  Unix (optional)
-     Listen on UNIX socket given in Address.
-  Session (required if you want to get POE callbacks)
-     Into which session we should post the POE event back.
-
-The handlers parameter should be a list of lists defining either regexps of
-paths to match or absolute paths to code references.
-
-The code references will be passed one parameter, a
-L<POE::Component::FastCGI::Request> object. To send a response
-the C<make_response> method should be called which returns a
-L<POE::Component::FastCGI::Response> object. These objects
-are subclasses of L<HTTP::Request> and L<HTTP::Response>
-respectively.
-
-Example:
-   Handlers => [
-      [ '/page' => \&page ],
-      [ qr!^/(\w+)\.html$! => sub {
-           my $request = shift;
-           my $response = $request->make_response;
-           output_template($request, $response, $1);
-        }
-      ],
-   ]
-
-=cut
 
 sub new {
    my($class, %args) = @_;
@@ -250,6 +143,103 @@ sub _shutdown {
 
 1;
 
+=head1 NAME
+
+POE::Component::FastCGI - POE FastCGI server
+
+=head1 SYNOPSIS
+
+You can use this module with a direct subroutine callback:
+
+  use POE;
+  use POE::Component::FastCGI;
+
+  POE::Component::FastCGI->new(
+     Port => 1026,
+     Handlers => [
+        [ '/' => \&default ],
+     ]
+  );
+
+  sub default {
+     my($request) = @_;
+
+     my $response = $request->make_response;
+     $response->header("Content-type" => "text/html");
+     $response->content("A page");
+     $response->send;
+  }
+
+  POE::Kernel->run;
+
+and a POE event callback:
+
+  use POE;
+  use POE::Component::FastCGI;
+
+  POE::Component::FastCGI->new(
+     Port => 1026,
+     Handlers => [
+        [ '/' => 'poe_event_name' ],
+     ]
+     Session => 'MAIN',
+  );
+
+  sub default {
+     my($request) = @_;
+
+     my $response = $request->make_response;
+     $response->header("Content-type" => "text/html");
+     $response->content("A page");
+     $response->send;
+  }
+
+=head1 DESCRIPTION
+
+Provides a FastCGI (L<http://www.fastcgi.com/>) server for L<POE>.
+
+=over 4
+
+=item POE::Component::FastCGI->new([name => value], ...)
+
+Creates a new POE session for the FastCGI server and listens on the specified
+port.
+
+Parameters
+  Auth (optional)
+     A code reference to run when called as a FastCGI authorizer.
+  Handlers (required)
+     A array reference with a mapping of paths to code references or POE event names.
+  Port (required unless Unix is set)
+     Port number to listen on.
+  Address (requied if Unix is set)
+     Address to listen on.
+  Unix (optional)
+     Listen on UNIX socket given in Address.
+  Session (required if you want to get POE callbacks)
+     Into which session we should post the POE event back.
+
+The handlers parameter should be a list of lists defining either regexps of
+paths to match or absolute paths to code references.
+
+The code references will be passed one parameter, a
+L<POE::Component::FastCGI::Request> object. To send a response
+the C<make_response> method should be called which returns a
+L<POE::Component::FastCGI::Response> object. These objects
+are subclasses of L<HTTP::Request> and L<HTTP::Response>
+respectively.
+
+Example:
+   Handlers => [
+      [ '/page' => \&page ],
+      [ qr!^/(\w+)\.html$! => sub {
+           my $request = shift;
+           my $response = $request->make_response;
+           output_template($request, $response, $1);
+        }
+      ],
+   ]
+
 =back
 
 =head1 USING FASTCGI
@@ -276,6 +266,10 @@ Lighttpd configuration example (assuming listening on port 1026):
    
 With mod_fastcgi on Apache the equivalent directive is
 C<FastcgiExternalServer>.
+
+=head1 MAINTAINER
+
+Chris 'BinGOs' Williams on behalf of the POE community
 
 =head1 AUTHOR
 

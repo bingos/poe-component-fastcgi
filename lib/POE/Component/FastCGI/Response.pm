@@ -1,42 +1,9 @@
-=head1 NAME
-
-POE::Component::FastCGI::Response - PoCo::FastCGI HTTP Response class 
-
-=head1 SYNOPSIS
-
-   use POE::Component::FastCGI::Response;
-   my $response = POE::Component::FastCGI::Response->new($client, $id,
-      200, ..  HTTP::Response parameters ..);
-
-=head1 DESCRIPTION
-
-This module is generally not used directly, you should call
-L<POE::Component::FastCGI::Request>'s C<make_response> method which
-returns an object of this class.
-
-C<POE::Component::FastCGI::Response> is a subclass of L<HTTP::Response>
-so inherits all of its methods. The includes C<header()> for setting output
-headers and C<content()> for setting the content.
-
-Therefore the following methods mostly deal with actually sending the
-response:
-
-=over 4
-
-=cut
-
 package POE::Component::FastCGI::Response;
+
 use strict;
 use base qw/HTTP::Response/;
 use bytes;
-#use URI;
 
-=item $response = POE::Component::FastCGI::Response->new($client, $id, $code)
-
-Creates a new C<POE::Component::FastCGI::Response> object, parameters from
-C<$code> onwards are passed directly to L<HTTP::Response>'s constructor.
-
-=cut
 sub new {
    my($class, $client, $id, $code, @response) = @_;
    $code = 200 unless defined $code;
@@ -54,12 +21,6 @@ sub DESTROY {
    $self->close;
 }
 
-=item $response->streaming
-
-Set and check streaming status
-
-=cut
-
 sub streaming {
 	my($self, $streaming) = @_;
 	if(defined $streaming) {
@@ -69,13 +30,6 @@ sub streaming {
 	}
 }
 
-=item $response->closed
-
-Set a callback to be called when this response is closed, mainly useful for
-streaming.
-
-=cut
-
 sub closed {
 	my($self, $callback) = @_;
 	if(defined $callback) {
@@ -84,12 +38,6 @@ sub closed {
 		$self->{closed}->($self);
 	}
 }
-
-=item $response->send
-
-Sends the response object and ends the current connection.
-
-=cut
 
 sub send {
    my($self) = @_;
@@ -120,26 +68,12 @@ sub send {
    return 1;
 }
 
-=item $response->write($text)
-
-Writes some text directly to the output stream, for use when you don't want
-to or can't send a L<HTTP::Response> object.
-
-=cut
 sub write {
    my($self, $out) = @_;
    $self->{client}->put({requestid => $self->{requestid}, content => $out});
    return 1;
 }
 
-=item $response->close
-
-Closes the output stream.
-
-You don't normally need to use this as the object will automatically close
-when DESTROYed.
-
-=cut
 sub close {
    my($self, $out) = @_;
    return unless defined $self->{client};
@@ -152,12 +86,6 @@ sub close {
    return 1;
 }
 
-=item $response->redirect($url)
-
-Sets the object to be a redirect to $url. You still need to call C<send> to
-actually send the redirect.
-
-=cut
 sub redirect {
    my($self, $url, $uri) = @_;
    $url = defined $self->request
@@ -168,12 +96,6 @@ sub redirect {
    $self->header(Location => $url);
 }
 
-=item $response->error($code, $text)
-
-Sends an error to the client, $code is the HTTP error code and $text is
-the content of the page to send.
-
-=cut
 sub error {
    my($self, $code, $text) = @_;
    $self->code($code);
@@ -183,6 +105,71 @@ sub error {
 }
 
 1;
+
+=head1 NAME
+
+POE::Component::FastCGI::Response - PoCo::FastCGI HTTP Response class 
+
+=head1 SYNOPSIS
+
+   use POE::Component::FastCGI::Response;
+   my $response = POE::Component::FastCGI::Response->new($client, $id,
+      200, ..  HTTP::Response parameters ..);
+
+=head1 DESCRIPTION
+
+This module is generally not used directly, you should call
+L<POE::Component::FastCGI::Request>'s C<make_response> method which
+returns an object of this class.
+
+C<POE::Component::FastCGI::Response> is a subclass of L<HTTP::Response>
+so inherits all of its methods. The includes C<header()> for setting output
+headers and C<content()> for setting the content.
+
+Therefore the following methods mostly deal with actually sending the
+response:
+
+=over 4
+
+=item $response = POE::Component::FastCGI::Response->new($client, $id, $code)
+
+Creates a new C<POE::Component::FastCGI::Response> object, parameters from
+C<$code> onwards are passed directly to L<HTTP::Response>'s constructor.
+
+=item $response->streaming
+
+Set and check streaming status
+
+=item $response->closed
+
+Set a callback to be called when this response is closed, mainly useful for
+streaming.
+
+=item $response->send
+
+Sends the response object and ends the current connection.
+
+=item $response->write($text)
+
+Writes some text directly to the output stream, for use when you don't want
+to or can't send a L<HTTP::Response> object.
+
+=item $response->close
+
+Closes the output stream.
+
+You don't normally need to use this as the object will automatically close
+when DESTROYed.
+
+=item $response->redirect($url)
+
+Sets the object to be a redirect to $url. You still need to call C<send> to
+actually send the redirect.
+
+=item $response->error($code, $text)
+
+Sends an error to the client, $code is the HTTP error code and $text is
+the content of the page to send.
 
 =back
 

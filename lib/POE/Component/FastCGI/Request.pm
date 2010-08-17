@@ -1,30 +1,5 @@
-=head1 NAME
-
-POE::Component::FastCGI::Request - PoCo::FastCGI HTTP Request class 
-
-=head1 SYNOPSIS
-
-   use POE::Component::FastCGI::Request;
-   my $response = POE::Component::FastCGI::Response->new($client, $id,
-      $cgi, $query);
-
-=head1 DESCRIPTION
-
-Objects of this class are generally created by L<POE::Component::FastCGI>,
-
-C<POE::Component::FastCGI::Request> is a subclass of L<HTTP::Response>
-so inherits all of its methods. The includes C<header()> for reading
-headers.
-
-It also wraps the enviroment variables found in FastCGI requests, so
-information such as the client's IP address and the server software
-in use is available.
-
-=over 4
-
-=cut
-
 package POE::Component::FastCGI::Request;
+
 use strict;
 
 use CGI::Util qw(unescape);
@@ -33,14 +8,6 @@ use base qw/HTTP::Request/;
 
 use POE::Component::FastCGI::Response; # for make_response
 
-=item $request = POE::Component::FastCGI::Request->new($client, $id, $cgi, $query)
-
-Creates a new C<POE::Component::FastCGI::Request> object. This deletes values
-from C<$cgi> while converting it into a L<HTTP::Request> object.
-It also assumes $cgi contains certain CGI variables. This generally should
-not be used directly, POE::Component::FastCGI creates these objects for you.
-
-=cut
 sub new {
    my($class, $client, $id, $cgi, $query) = @_;
    my $host = defined $cgi->{HTTP_HOST} ? $cgi->{HTTP_HOST} :
@@ -76,13 +43,6 @@ sub DESTROY {
    }
 }
 
-=item $response = $request->make_response([$response])
-
-Makes a response object for this request or if the optional parameter is
-provided turns a normal HTTP::Response object into a
-POE::Component::FastCGI::Response object that is linked to this request.
-
-=cut
 sub make_response {
    my($self, $response) = @_;
 
@@ -108,25 +68,12 @@ sub make_response {
    return $response;
 }
 
-=item $request->error($code[, $text])
-
-Sends a HTTP error back to the user.
-
-=cut
 sub error {
    my($self, $code, $text) = @_;
    warn "Error $code: $text\n";
    $self->make_response->error($code, $text);
 }
 
-=item $request->env($name)
-
-Gets the specified variable out of the CGI environment.
-
-eg:
-   $request->env("REMOTE_ADDR");
-
-=cut
 sub env {
    my($self, $env) = @_;
    if(exists $self->{env}->{$env}) {
@@ -135,13 +82,6 @@ sub env {
    return undef;
 }
 
-=item $request->query([$name])
-
-Gets the value of name from the query (GET or POST data).
-Without a parameter returns a hash reference containing all
-the query data.
-
-=cut
 sub query {
    my($self, $param) = @_;
    
@@ -161,13 +101,6 @@ sub query {
    return undef;
 }
 
-=item $request->cookie([$name])
-
-Gets the value of the cookie with name from the request.
-Without a parameter returns a hash reference containing all
-the cookie data.
-
-=cut
 sub cookie {
    my($self, $name) = @_;
 
@@ -195,6 +128,66 @@ sub _parse {
 }
 
 1;
+
+=head1 NAME
+
+POE::Component::FastCGI::Request - PoCo::FastCGI HTTP Request class 
+
+=head1 SYNOPSIS
+
+   use POE::Component::FastCGI::Request;
+   my $response = POE::Component::FastCGI::Response->new($client, $id,
+      $cgi, $query);
+
+=head1 DESCRIPTION
+
+Objects of this class are generally created by L<POE::Component::FastCGI>,
+
+C<POE::Component::FastCGI::Request> is a subclass of L<HTTP::Response>
+so inherits all of its methods. The includes C<header()> for reading
+headers.
+
+It also wraps the enviroment variables found in FastCGI requests, so
+information such as the client's IP address and the server software
+in use is available.
+
+=over 4
+
+=item $request = POE::Component::FastCGI::Request->new($client, $id, $cgi, $query)
+
+Creates a new C<POE::Component::FastCGI::Request> object. This deletes values
+from C<$cgi> while converting it into a L<HTTP::Request> object.
+It also assumes $cgi contains certain CGI variables. This generally should
+not be used directly, POE::Component::FastCGI creates these objects for you.
+
+=item $response = $request->make_response([$response])
+
+Makes a response object for this request or if the optional parameter is
+provided turns a normal HTTP::Response object into a
+POE::Component::FastCGI::Response object that is linked to this request.
+
+=item $request->error($code[, $text])
+
+Sends a HTTP error back to the user.
+
+=item $request->env($name)
+
+Gets the specified variable out of the CGI environment.
+
+eg:
+   $request->env("REMOTE_ADDR");
+
+=item $request->query([$name])
+
+Gets the value of name from the query (GET or POST data).
+Without a parameter returns a hash reference containing all
+the query data.
+
+=item $request->cookie([$name])
+
+Gets the value of the cookie with name from the request.
+Without a parameter returns a hash reference containing all
+the cookie data.
 
 =back
 

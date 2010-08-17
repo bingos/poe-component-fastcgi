@@ -1,27 +1,5 @@
-=head1 NAME
-
-POE::Filter::FastCGI - Parse and create FastCGI requests
-
-=head1 SYNOPSIS
-
-   $fastcgi = POE::Filter::FastCGI->new;
-   $arrayref_with_binary_fastcgi_response = $fastcgi->put($put);
-   $arrayref_with_fastcgi_request_array = $fastcgi->get($chunks);
-
-=head1 DESCRIPTION
-
-Parses the FastCGI binary protocol into a perl array with the CGI
-environment and any POST or other data that is sent.
-
-Accepts either L<POE::Component::FastCGI::Response> objects or a
-simple hash reference via C<put> and converts into the FastCGI
-binary protocol. The hash reference should have keys of requestid
-and content and an optional key of close to end the FastCGI
-request.
-
-=cut
-
 package POE::Filter::FastCGI;
+
 use strict;
 use bytes;
 
@@ -265,6 +243,27 @@ sub _write {
 }
 
 1;
+
+=head1 NAME
+
+POE::Filter::FastCGI - Parse and create FastCGI requests
+
+=head1 SYNOPSIS
+
+   $fastcgi = POE::Filter::FastCGI->new;
+   $arrayref_with_binary_fastcgi_response = $fastcgi->put($put);
+   $arrayref_with_fastcgi_request_array = $fastcgi->get($chunks);
+
+=head1 DESCRIPTION
+
+Parses the FastCGI binary protocol into a perl array with the CGI
+environment and any POST or other data that is sent.
+
+Accepts either L<POE::Component::FastCGI::Response> objects or a
+simple hash reference via C<put> and converts into the FastCGI
+binary protocol. The hash reference should have keys of requestid
+and content and an optional key of close to end the FastCGI
+request.
 
 =head1 AUTHOR
 
