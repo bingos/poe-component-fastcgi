@@ -104,7 +104,7 @@ sub _input {
       $request->error(404, "No handler found for $path");
    }else{
 
-     if(ref($run->[1]) eq 'CODE') {
+     if(ref($run->[1]) eq 'CODE' or $run->[1]->isa('POE::Session::AnonEvent') ) {
        $run->[1]->($request, $run->[0]);
      } else {
        $kernel->post($heap->{Session}, $run->[1],$request, $run->[0]);

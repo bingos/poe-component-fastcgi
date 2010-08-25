@@ -1,5 +1,9 @@
 Revision history for Perl extension POE::Component::FastCGI.
 
+0.14  Thu Aug 26 00:16:47 BST 2010
+
+  Make the use of POE::Session postbacks work again
+
 0.12  Tue Aug 17 13:02:27 BST 2010
 
   POE Community release
