@@ -1,5 +1,9 @@
 Revision history for Perl extension POE::Component::FastCGI.
 
+0.16  Mon Sep 20 22:52:03 BST 2010
+
+  Apply a patch RT#61496 from symkat to add the content-length header to responses.
+
 0.14  Thu Aug 26 00:16:47 BST 2010
 
   Make the use of POE::Session postbacks work again
