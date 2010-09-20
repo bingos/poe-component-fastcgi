@@ -48,6 +48,7 @@ sub send {
    # Use network newlines, and be sure not to mangle newlines in the
    # response's content.
 
+   $self->header( "Content-Length" => length($self->content) );
    my @headers;
    push @headers, $status_line;
    push @headers, $self->headers_as_string("\x0D\x0A");
