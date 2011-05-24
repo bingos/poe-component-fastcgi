@@ -23,24 +23,31 @@ sub new {
    croak "No handlers defined" unless defined $args{Auth} or defined
       $args{Handlers};
 
-   my $session = POE::Session->create(
+   my $session_id = POE::Session->create(
       inline_states => {
          _start => \&_start,
          accept => \&_accept,
          input  => \&_input,
          error  => \&_error,
-         shutdown  => \&_shutdown,
+         client_shutdown  => \&_client_shutdown,
+
+         # For graceful external shutdown
+         shutdown => \&_shutdown,
+
+         # Dummys to keep of warnings
+         _stop => sub {},
+         _child => sub {}
       },
       heap => \%args,
-   );
+   )->ID;
    
-   return 1;
+   return $session_id;
 }
 
 sub _start {
    my($session, $heap) = @_[SESSION, HEAP];
 
-   POE::Component::Server::TCP->new(
+   $heap->{server} = POE::Component::Server::TCP->new(
       Port => $heap->{Port},
       (defined $heap->{Unix} ? (Domain => AF_UNIX) : ()),
       (defined $heap->{Address} ? (Address => $heap->{Address}) : ()),
@@ -134,11 +141,21 @@ sub _error {
    undef;
 }
 
-sub _shutdown {
+sub _client_shutdown {
    my($heap, $wheel_id) = @_[HEAP, ARG0];
    delete $heap->{wheels}->{$wheel_id};
 
    undef;
+}
+
+sub _shutdown {
+   my($heap, $kernel)  = @_[HEAP, KERNEL];
+
+   return unless defined $heap->{server};
+
+   # Tell TCP server to shutdown
+   $kernel->post($heap->{server}, 'shutdown');
+   delete $heap->{server};
 }
 
 1;
