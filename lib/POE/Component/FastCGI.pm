@@ -260,6 +260,8 @@ Parameters
   Session (required if you want to get POE callbacks)
      Into which session we should post the POE event back.
 
+The call returns a POE session ID. This should be stored, and when application is to be terminated, a 'shutdown' event can be posted to this session. This will terminate the server socket and free resources.
+
 The handlers parameter should be a list of lists defining either regexps of
 paths to match or absolute paths to code references.
 
