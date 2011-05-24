@@ -34,6 +34,12 @@ sub new {
          # For graceful external shutdown
          shutdown => \&_shutdown,
 
+         # triggered from PoCo::FastCGI::Response in order to make sure
+         # we're writing to our wheel from the correct session.
+         w_send => \&_w_send,
+         w_write => \&_w_write,
+         w_close => \&_w_close,
+
          # Dummys to keep of warnings
          _stop => sub {},
          _child => sub {}
@@ -73,12 +79,12 @@ sub _accept {
 }
 
 sub _input {
-   my($heap, $kernel, $fcgi, $wheel_id) = @_[HEAP, KERNEL, ARG0, ARG1];
+   my($heap, $session, $kernel, $fcgi, $wheel_id) = @_[HEAP, SESSION, KERNEL, ARG0, ARG1];
    
    my $client = $heap->{wheels}->{$wheel_id};
 
    my $request = POE::Component::FastCGI::Request->new(
-      $client,
+      $client, $session->ID,
       $fcgi->[0], # request id
       $fcgi->[2], # cgi parameters
       $fcgi->[1]->{postdata}
@@ -143,6 +149,7 @@ sub _error {
 
 sub _client_shutdown {
    my($heap, $wheel_id) = @_[HEAP, ARG0];
+
    delete $heap->{wheels}->{$wheel_id};
 
    undef;
@@ -156,6 +163,23 @@ sub _shutdown {
    # Tell TCP server to shutdown
    $kernel->post($heap->{server}, 'shutdown');
    delete $heap->{server};
+}
+
+# these are here to help PoCo::FastCGI::Response
+# to deal with it's wheel from the right session
+sub _w_send {
+   my($resp)  = $_[ARG0];
+   $resp->_send();
+}
+
+sub _w_write {
+   my($resp, $out)  = @_[ARG0, ARG1];
+   $resp->_write($out);
+}
+
+sub _w_close {
+   my($resp, $out)  = @_[ARG0, ARG1];
+   $resp->_close($out);
 }
 
 1;

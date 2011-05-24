@@ -4,6 +4,8 @@ use strict;
 use base qw/HTTP::Response/;
 use bytes;
 
+use POE::Kernel;
+
 sub new {
    my($class, $client, $id, $code, @response) = @_;
    $code = 200 unless defined $code;
@@ -22,24 +24,50 @@ sub DESTROY {
 }
 
 sub streaming {
-	my($self, $streaming) = @_;
-	if(defined $streaming) {
-		$self->{streaming} = $streaming;
-	}else{
-		return $self->{streaming};
-	}
+   my($self, $streaming) = @_;
+   if(defined $streaming) {
+      $self->{streaming} = $streaming;
+   }else{
+      return $self->{streaming};
+   }
 }
 
 sub closed {
-	my($self, $callback) = @_;
-	if(defined $callback) {
-		$self->{closed} = $callback;
-	}elsif(defined $self->{closed}) {
-		$self->{closed}->($self);
-	}
+   my($self, $callback) = @_;
+   if(defined $callback) {
+      $self->{closed} = $callback;
+   }elsif(defined $self->{closed}) {
+      $self->{closed}->($self);
+   }
 }
 
+# Write and send call put() on the wheel. It is imperative that we
+# do this from the wheel-owners session. Else we might register event
+# handlers in the wrong sessions. For example, when we register the
+# FlushedEvent event handler, that would be registered on the wrong
+# session, and the wheel would never be closed properly. 
 sub send {
+   my($self) = @_;
+   $poe_kernel->call($self->request->{sessionid},
+      'w_send', $self);
+}
+
+sub write {
+   my($self, $out) = @_;
+   $poe_kernel->call($self->request->{sessionid},
+      'w_write', $self, $out);
+   return 1;
+}
+
+sub close {
+   my($self, $out) = @_;
+   return unless defined $self->{client};
+   $poe_kernel->call($self->request->{sessionid},
+      'w_close', $self, $out);
+}
+
+
+sub _send {
    my($self) = @_;
 
 # Adapted from POE::Filter::HTTPD
@@ -53,36 +81,41 @@ sub send {
    push @headers, $status_line;
    push @headers, $self->headers_as_string("\x0D\x0A");
 
+   my $filter = $self->{client}->get_input_filter();
+   my $keepconn = $filter->{conn}->[$filter->{requestid}]->{keepconn};
+
    $self->{client}->put({
       requestid => $self->{requestid},
-      close => 1,
+      close => !$keepconn,
       content => join("\x0D\x0A", @headers, "") . $self->content
    });
 
    ### FCGI_KEEP_CONN: disconnect after request if NOT set:
-   my $filter = $self->{client}->get_input_filter();
-   if ($filter->{conn}->[$filter->{requestid}]->{keepconn} == 0) {
-       $self->{client}->event( FlushedEvent => "shutdown" );
+   if($keepconn == 0) {
+      $self->{client}->event( FlushedEvent => "client_shutdown" );
    }
 
+   # Kill circular ref & delete wheel reference
+   $self->request->{_res} = 0;
    delete $self->{client};
    return 1;
 }
 
-sub write {
+sub _write {
    my($self, $out) = @_;
    $self->{client}->put({requestid => $self->{requestid}, content => $out});
-   return 1;
 }
 
-sub close {
+sub _close {
    my($self, $out) = @_;
-   return unless defined $self->{client};
    $self->{client}->put({
       requestid => $self->{requestid},
       close => 1,
       content => ""
    });
+
+   # Kill circular ref & delete wheel reference
+   $self->request->{_res} = 0;
    delete $self->{client};
    return 1;
 }

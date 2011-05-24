@@ -126,7 +126,8 @@ sub _do_record {
 			role => $ROLE[$role],
 			cgi => { },
 		};
-                $self->{conn}->[$self->{requestid}]{keepconn} = $flags & FCGI_KEEP_CONN ? 1 : 0;
+
+		$self->{conn}->[$self->{requestid}]{keepconn} = $flags & FCGI_KEEP_CONN ? 1 : 0;
 		return $self->_cleanup;
 	}
 

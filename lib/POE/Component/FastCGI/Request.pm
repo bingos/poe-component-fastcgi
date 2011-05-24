@@ -9,7 +9,7 @@ use base qw/HTTP::Request/;
 use POE::Component::FastCGI::Response; # for make_response
 
 sub new {
-   my($class, $client, $id, $cgi, $query) = @_;
+   my($class, $client, $sessionid, $id, $cgi, $query) = @_;
    my $host = defined $cgi->{HTTP_HOST} ? $cgi->{HTTP_HOST} :
       $cgi->{SERVER_NAME};
 
@@ -30,6 +30,7 @@ sub new {
    );
    
    $self->{client} = $client;
+   $self->{sessionid} = $sessionid;
    $self->{requestid} = $id;
    $self->{env} = $cgi;
    
@@ -51,7 +52,7 @@ sub make_response {
          $self->{client},
          $self->{requestid},
       );
-		$self->{_res} = $response;
+      $self->{_res} = $response;
       $response->request($self);
       return $response;
    }
@@ -63,7 +64,7 @@ sub make_response {
    $response->{client} = $self->{client};
    $response->{requestid} = $self->{requestid};
    $response->request($self);
-	$self->{_res} = $response;
+   $self->{_res} = $response;
 
    return $response;
 }
