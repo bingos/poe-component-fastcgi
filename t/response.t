@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 use Test::Simple tests => 1;
 my($destroy, $put);
 use Carp qw(confess);

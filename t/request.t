@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 use Test::Simple tests => 17;
 
 use POE::Component::FastCGI::Request;
@@ -8,6 +7,7 @@ ok(1);
 my $get = POE::Component::FastCGI::Request->new(
 	undef, # XXX
 	1,
+  1,
 	{
 		REQUEST_METHOD => "GET",
 		REQUEST_URI => "/test?foo=bar",
@@ -27,6 +27,7 @@ ok(UNIVERSAL::isa($get->make_response, 'POE::Component::FastCGI::Response'));
 my $post = POE::Component::FastCGI::Request->new(
 	undef, # XXX
 	1,
+  1,
 	{
 		REQUEST_METHOD => "POST",
 		REQUEST_URI => "/something",
