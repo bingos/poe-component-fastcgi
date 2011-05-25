@@ -45,7 +45,7 @@ sub closed {
 # do this from the wheel-owners session. Else we might register event
 # handlers in the wrong sessions. For example, when we register the
 # FlushedEvent event handler, that would be registered on the wrong
-# session, and the wheel would never be closed properly. 
+# session, and the wheel would never be closed properly.
 sub send {
    my($self) = @_;
    $poe_kernel->call($self->request->{sessionid},
@@ -142,7 +142,7 @@ sub error {
 
 =head1 NAME
 
-POE::Component::FastCGI::Response - PoCo::FastCGI HTTP Response class 
+POE::Component::FastCGI::Response - PoCo::FastCGI HTTP Response class
 
 =head1 SYNOPSIS
 
@@ -220,7 +220,7 @@ Please let me know.
 
 =head1 SEE ALSO
 
-L<POE::Component::FastCGI::Request>, L<HTTP::Response>, 
+L<POE::Component::FastCGI::Request>, L<HTTP::Response>,
 L<POE::Component::FastCGI>, L<POE>.
 
 =cut

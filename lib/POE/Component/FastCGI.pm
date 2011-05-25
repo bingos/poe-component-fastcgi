@@ -46,7 +46,7 @@ sub new {
       },
       heap => \%args,
    )->ID;
-   
+
    return $session_id;
 }
 
@@ -80,7 +80,7 @@ sub _accept {
 
 sub _input {
    my($heap, $session, $kernel, $fcgi, $wheel_id) = @_[HEAP, SESSION, KERNEL, ARG0, ARG1];
-   
+
    my $client = $heap->{wheels}->{$wheel_id};
 
    my $request = POE::Component::FastCGI::Request->new(
@@ -89,7 +89,7 @@ sub _input {
       $fcgi->[2], # cgi parameters
       $fcgi->[1]->{postdata}
    );
-   
+
    if($fcgi->[1]->{role} eq 'AUTHORIZER') {
       if(defined $heap->{Auth}) {
          $heap->{Auth}->($request);
@@ -112,7 +112,7 @@ sub _input {
             ($handler->[0] eq $path));
       }
    }
-   
+
    if(not defined $run) {
       $request->error(404, "No handler found for $path");
    }else{
@@ -303,10 +303,10 @@ Lighttpd configuration example (assuming listening on port 1026):
             "check-local" => "disable",
             "docroot" => "/"
             )
-         )  
+         )
       )
    }
-   
+
 With mod_fastcgi on Apache the equivalent directive is
 C<FastcgiExternalServer>.
 

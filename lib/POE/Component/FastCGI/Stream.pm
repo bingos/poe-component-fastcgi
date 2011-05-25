@@ -9,14 +9,14 @@ use CGI::Util qw(escape);
 
 sub new {
 	my($class, %params) = @_;
-	
+
 	my $prefix = defined $params{Prefix} ? $params{Prefix} : "";
 	my $cookiename = defined $params{Cookie} ? $params{Cookie} : undef;
 	my $states = delete $params{States};
 	my $handlers = delete $params{Handlers};
 
 	carp "No states defined!" unless defined $states;
-	
+
 	POE::Component::FastCGI->new(
 		%params,
 		Handlers => [
@@ -30,13 +30,13 @@ sub new {
 				$param =~ s!^/!!;
 
 				print $request->method . " " . $request->uri . "\n";
-				
+
 				my $session = $poe_kernel->alias_resolve("client-$id");
 				if(not defined $session) {
 					$request->make_response->code(404);
 					return;
 				}
-				
+
 				return unless check_cookie($session->get_heap, $request);
 
 				$param = "default" unless defined $param and $param;
@@ -50,12 +50,12 @@ sub new {
 			} ],
 			[ "$prefix/new" => sub {
 				my($request) = @_;
-				
+
 				my $type = $request->query("type");
 				return unless $type eq "xmlhttp" or $type eq "iframe";
 
 				my $id = md5_hex(rand() . join "", values %{$request->{env}});
-				
+
 				my $session = POE::Session->create(
 					inline_states => {
 						# Include all states passed to us in constructor
@@ -134,7 +134,7 @@ sub stream {
 	$response->streaming(1);
 	$response->closed(\&stream_closed);
 	$response->{id} = $heap->{sessid};
-	
+
 	if($heap->{type} eq 'iframe') {
 		$response->write("<html>\nstream $request->{requestid}\n<!-- "
 			. ("padding " x 10) . "-->\n\n");

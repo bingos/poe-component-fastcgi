@@ -11,12 +11,12 @@ BEGIN {
 	use constant HEADER_LENGTH    => 8;
    use constant STATE_WAIT       => 1;
    use constant STATE_DATA       => 2;
-   
+
    use constant REQUEST_COMPLETE => 0;
    use constant CANT_MPX_CONN    => 1;
    use constant OVERLOADED       => 2;
    use constant UNKNOWN_ROLE     => 3;
-	
+
     # Request flag constants
     use constant FCGI_KEEP_CONN   => 1;
 
@@ -38,7 +38,7 @@ BEGIN {
 		NULL
 		RESPONDER
 		AUTHORIZER
-		FILTER	
+		FILTER
 	);
 	$c = 1;
 	constant->import($_ => $c++) for @ROLE[1 .. $#ROLE];
@@ -72,7 +72,7 @@ sub get_pending {
 
 sub get_one {
 	my($self) = @_;
-	
+
 	while($self->{buffer}) {
 		if($self->{state} == STATE_WAIT) {
 			return [ ] unless length $self->{buffer} >= HEADER_LENGTH;
@@ -142,7 +142,7 @@ sub _do_record {
 			my($nlen, $vlen);
 			while(defined($nlen = _read_nv_len(\$content, \$offset)) &&
 					defined($vlen = _read_nv_len(\$content, \$offset))) {
-				my($name, $value) = (substr($content, $offset, $nlen), 
+				my($name, $value) = (substr($content, $offset, $nlen),
 						substr($content, $offset + $nlen, $vlen));
 				$conn->{cgi}->{$name} = $value;
 				$offset += $nlen + $vlen;
@@ -186,7 +186,7 @@ sub _read_nv_len {
 sub put {
 	my($self, $input) = @_;
 	my @output;
-	
+
 	for my $response(@$input) {
 		if(UNIVERSAL::isa($response, "POE::Component::FastCGI::Response")) {
 			$self->_write(\@output, $response->{requestid},
@@ -221,7 +221,7 @@ sub _close {
 # Append FastCGI packets to @$output.
 sub _write {
    my ($self, $output, $id, $type, $content) = @_;
-   my $length = length $content; 
+   my $length = length $content;
    my $offset = 0;
 
 	if($length == 0) {

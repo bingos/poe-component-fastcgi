@@ -28,12 +28,12 @@ sub new {
       ),
       $query
    );
-   
+
    $self->{client} = $client;
    $self->{sessionid} = $sessionid;
    $self->{requestid} = $id;
    $self->{env} = $cgi;
-   
+
    return $self;
 }
 
@@ -60,7 +60,7 @@ sub make_response {
    if(not $response->isa("POE::Component::FastCGI::Response")) {
       bless $response, "POE::Component::FastCGI::Response";
    }
-   
+
    $response->{client} = $self->{client};
    $response->{requestid} = $self->{requestid};
    $response->request($self);
@@ -85,7 +85,7 @@ sub env {
 
 sub query {
    my($self, $param) = @_;
-   
+
    if(not exists $self->{_query}) {
       if($self->method eq 'GET') {
          $self->{_query} = _parse(\$self->{env}->{QUERY_STRING});
@@ -93,7 +93,7 @@ sub query {
          $self->{_query} = _parse($self->content_ref);
       }
    }
-   
+
    if(not defined $param) {
       return $self->{_query};
    }elsif(exists $self->{_query}->{$param}) {
@@ -132,7 +132,7 @@ sub _parse {
 
 =head1 NAME
 
-POE::Component::FastCGI::Request - PoCo::FastCGI HTTP Request class 
+POE::Component::FastCGI::Request - PoCo::FastCGI HTTP Request class
 
 =head1 SYNOPSIS
 
@@ -205,7 +205,7 @@ Please let me know.
 
 =head1 SEE ALSO
 
-L<POE::Component::FastCGI::Response>, L<HTTP::Request>, 
+L<POE::Component::FastCGI::Response>, L<HTTP::Request>,
 L<POE::Component::FastCGI>, L<POE>.
 
 =cut
