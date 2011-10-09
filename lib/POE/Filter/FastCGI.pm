@@ -83,7 +83,8 @@ sub get_one {
 			@$self{qw/version type requestid contentlen padlen/} =
 				unpack "CCnnC", $header;
 
-			warn "Wrong version" if $self->{version} != FCGI_VERSION_1;
+			warn "Wrong version, or direct request from a browser"
+				if $self->{version} != FCGI_VERSION_1;
 
 			if($self->{contentlen}) {
 				$self->{state} = STATE_DATA;
