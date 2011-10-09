@@ -123,14 +123,16 @@ sub _input {
        $kernel->post($heap->{Session}, $run->[1],$request, $run->[0]);
      }
 
-     # Streaming support
-     if($request->{_res} and $request->{_res}->streaming) {
-       push @{$heap->{toclose}->{$wheel_id}}, $request->{_res};
-     }elsif(defined $request->{_res}) {
-       # Send and break circular ref
-       $request->{_res}->send if exists $request->{_res}->{client};
-       $request->{_res} = 0;
-     }
+	 if($request->{_res}) {
+		 # Streaming support
+		 if($request->{_res}->streaming) {
+			 push @{$heap->{toclose}->{$wheel_id}}, $request->{_res};
+		 } else {
+			 # Send and break circular ref
+			 $request->{_res}->send if exists $request->{_res}->{client};
+			 $request->{_res} = 0;
+		 }
+	 }
    }
 }
 
