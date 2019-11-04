@@ -87,7 +87,7 @@ sub query {
    my($self, $param) = @_;
 
    if(not exists $self->{_query}) {
-      if($self->method eq 'GET') {
+      if($self->method eq 'GET' or $self->method eq 'HEAD') {
          $self->{_query} = _parse(\$self->{env}->{QUERY_STRING});
       }else{
          $self->{_query} = _parse($self->content_ref);
