@@ -1,4 +1,5 @@
 package POE::Component::FastCGI::Stream;
+
 use strict;
 use warnings;
 use Carp;
